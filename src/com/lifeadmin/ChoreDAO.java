@@ -42,3 +42,24 @@ public class ChoreDAO {
         return chores;
     }
 }
+public void markDone(int id) {
+    String sql = "UPDATE chores SET is_done = 1 WHERE id = ?";
+    try (Connection conn = DBConnection.connect();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, id);
+        ps.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+public void deleteChore(int id) {
+    String sql = "DELETE FROM chores WHERE id = ?";
+    try (Connection conn = DBConnection.connect();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, id);
+        ps.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
