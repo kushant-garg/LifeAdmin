@@ -1,6 +1,7 @@
 {
     "java.project.sourcePaths": ["src"],
     "java.project.outputPath": "bin",
+    "java.debug.settings.vmArgs": "--module-path \"C:\\Users\\gargk\\OneDrive\\Desktop\\javafx-sdk-26.0.2\\lib\" --add-modules javafx.controls,javafx.fxml",
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "c:\\Users\\gargk\\OneDrive\\Desktop\\javafx-sdk-26.0.2\\lib\\javafx.base.jar",

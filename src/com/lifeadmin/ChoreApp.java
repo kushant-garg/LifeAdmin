@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ChoreApp extends Application {
     private ChoreDAO dao = new ChoreDAO();
-    private ListView<String> listView = new ListView<>();
+    private VBox choreListBox = new VBox(5);
 
     @Override
     public void start(Stage stage) {
@@ -35,21 +35,35 @@ public class ChoreApp extends Application {
         HBox form = new HBox(10, titleField, datePicker, addButton);
         form.setPadding(new Insets(10));
 
-        VBox root = new VBox(10, form, listView);
+        ScrollPane scrollPane = new ScrollPane(choreListBox);
+        scrollPane.setFitToWidth(true);
+
+        VBox root = new VBox(10, form, scrollPane);
         root.setPadding(new Insets(10));
 
         refreshList();
 
-        stage.setScene(new Scene(root, 500, 400));
+        stage.setScene(new Scene(root, 550, 450));
         stage.setTitle("LifeAdmin");
         stage.show();
     }
 
     private void refreshList() {
-        listView.getItems().clear();
+        choreListBox.getChildren().clear();
         List<Chore> chores = dao.getAllChores();
         for (Chore c : chores) {
-            listView.getItems().add(c.toString());
+            Label label = new Label(c.toString());
+            label.setPrefWidth(380);
+
+            Button doneButton = new Button(c.isDone() ? "✓ Done" : "Mark Done");
+            doneButton.setDisable(c.isDone());
+            doneButton.setOnAction(e -> {
+                dao.markDone(c.getId());
+                refreshList();
+            });
+
+            HBox row = new HBox(10, label, doneButton);
+            choreListBox.getChildren().add(row);
         }
     }
 

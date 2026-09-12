@@ -7,6 +7,12 @@
             "request": "launch",
             "mainClass": "com.lifeadmin.ChoreApp",
             "vmArgs": "--module-path \"C:\\Users\\gargk\\OneDrive\\Desktop\\javafx-sdk-26.0.2\\lib\" --add-modules javafx.controls,javafx.fxml"
+        },
+        {
+            "type": "java",
+            "name": "Launch Main",
+            "request": "launch",
+            "mainClass": "com.lifeadmin.Main"
         }
     ]
 }
