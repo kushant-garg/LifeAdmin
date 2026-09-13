@@ -9,12 +9,15 @@ public class Database {
                 "title VARCHAR(255) NOT NULL," +
                 "due_date VARCHAR(20) NOT NULL," +
                 "category VARCHAR(100)," +
-                "is_done INT DEFAULT 0" +
+                "is_done INT DEFAULT 0," +
+                "document_path VARCHAR(500)," +
+                "user_id INT NOT NULL," +
+                "recurrence VARCHAR(20) DEFAULT 'none'" +
                 ")";
         try (Connection conn = DBConnection.connect();
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Table ready.");
+            System.out.println("Chores table ready.");
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -7,33 +7,32 @@ import java.util.List;
 
 public class ChoreDAO {
 
-    public void addChore(Chore chore) {
-        String sql = "INSERT INTO chores(title, due_date, category, is_done) VALUES(?,?,?,?)";
+    public void addChore(Chore chore, String documentPath) {
+        String sql = "INSERT INTO chores(title, due_date, category, is_done, document_path, user_id, recurrence) VALUES(?,?,?,?,?,?,?)";
         try (Connection conn = DBConnection.connect();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, chore.getTitle());
             ps.setString(2, chore.getDueDate().toString());
             ps.setString(3, chore.getCategory());
             ps.setInt(4, chore.isDone() ? 1 : 0);
+            ps.setString(5, documentPath);
+            ps.setInt(6, chore.getUserId());
+            ps.setString(7, chore.getRecurrence());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public List<Chore> getAllChores() {
+    public List<Chore> getAllChores(int userId) {
         List<Chore> chores = new ArrayList<>();
-        String sql = "SELECT * FROM chores";
+        String sql = "SELECT * FROM chores WHERE user_id = ? ORDER BY due_date ASC";
         try (Connection conn = DBConnection.connect();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                chores.add(new Chore(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        LocalDate.parse(rs.getString("due_date")),
-                        rs.getString("category"),
-                        rs.getInt("is_done") == 1));
+                chores.add(mapRow(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -41,10 +40,66 @@ public class ChoreDAO {
         return chores;
     }
 
+    public List<Chore> getChoresDueSoon(int userId, int daysAhead) {
+        List<Chore> chores = new ArrayList<>();
+        String sql = "SELECT * FROM chores WHERE user_id = ? AND is_done = 0 AND due_date <= ? ORDER BY due_date ASC";
+        try (Connection conn = DBConnection.connect();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            LocalDate threshold = LocalDate.now().plusDays(daysAhead);
+            ps.setString(2, threshold.toString());
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                chores.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return chores;
+    }
+
+    private Chore mapRow(ResultSet rs) throws SQLException {
+        return new Chore(
+            rs.getInt("id"), rs.getString("title"),
+            LocalDate.parse(rs.getString("due_date")),
+            rs.getString("category"), rs.getInt("is_done") == 1,
+            rs.getInt("user_id"), rs.getString("recurrence")
+        );
+    }
+
+    // Marks a chore done, and if it's recurring, automatically inserts the next cycle.
+    public void completeChore(int id) {
+        String selectSql = "SELECT * FROM chores WHERE id = ?";
+        try (Connection conn = DBConnection.connect();
+             PreparedStatement ps = conn.prepareStatement(selectSql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Chore chore = mapRow(rs);
+                markDone(id);
+
+                String recurrence = chore.getRecurrence();
+                if (recurrence != null && !recurrence.equals("none")) {
+                    LocalDate nextDate = switch (recurrence) {
+                        case "weekly" -> chore.getDueDate().plusWeeks(1);
+                        case "monthly" -> chore.getDueDate().plusMonths(1);
+                        case "yearly" -> chore.getDueDate().plusYears(1);
+                        default -> chore.getDueDate();
+                    };
+                    Chore nextCycle = new Chore(0, chore.getTitle(), nextDate,
+                            chore.getCategory(), false, chore.getUserId(), recurrence);
+                    addChore(nextCycle, null);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void markDone(int id) {
         String sql = "UPDATE chores SET is_done = 1 WHERE id = ?";
         try (Connection conn = DBConnection.connect();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -55,31 +110,11 @@ public class ChoreDAO {
     public void deleteChore(int id) {
         String sql = "DELETE FROM chores WHERE id = ?";
         try (Connection conn = DBConnection.connect();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public List<Chore> getChoresDueSoon(int daysAhead) {
-        List<Chore> chores = new ArrayList<>();
-        String sql = "SELECT * FROM chores WHERE is_done = 0 AND due_date <= ?";
-        try (Connection conn = DBConnection.connect();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            LocalDate threshold = LocalDate.now().plusDays(daysAhead);
-            ps.setString(1, threshold.toString());
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                chores.add(new Chore(
-                        rs.getInt("id"), rs.getString("title"),
-                        LocalDate.parse(rs.getString("due_date")),
-                        rs.getString("category"), rs.getInt("is_done") == 1));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return chores;
     }
 }

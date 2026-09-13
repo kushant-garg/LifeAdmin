@@ -8,13 +8,17 @@ public class Chore {
     private LocalDate dueDate;
     private String category;
     private boolean isDone;
+    private int userId;
+    private String recurrence;
 
-    public Chore(int id, String title, LocalDate dueDate, String category, boolean isDone) {
+    public Chore(int id, String title, LocalDate dueDate, String category, boolean isDone, int userId, String recurrence) {
         this.id = id;
         this.title = title;
         this.dueDate = dueDate;
         this.category = category;
         this.isDone = isDone;
+        this.userId = userId;
+        this.recurrence = recurrence;
     }
 
     public int getId() { return id; }
@@ -22,6 +26,8 @@ public class Chore {
     public LocalDate getDueDate() { return dueDate; }
     public String getCategory() { return category; }
     public boolean isDone() { return isDone; }
+    public int getUserId() { return userId; }
+    public String getRecurrence() { return recurrence; }
     public void setDone(boolean done) { isDone = done; }
 
     @Override
