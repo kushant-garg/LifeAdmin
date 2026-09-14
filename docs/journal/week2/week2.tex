@@ -1,5 +1,6 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
 \usepackage{enumitem}
 
 \title{LifeAdmin: Week 2 Progress Report}
@@ -71,5 +72,26 @@ The current implementation is a functional prototype rather than a production-re
 
 \section{Next Steps}
 The next development phase should focus on improving reliability and completing the remaining proposal goals. Planned work includes secure password hashing and stronger validation, improved error messages for database and file failures, tests for DAO and recurrence behavior, and a more formal relationship between users, chores, and documents in the database. The optional OCR feature can then be investigated to detect dates from uploaded documents and suggest or create relevant chore deadlines. Additional work may also include explicit reminder notifications instead of relying only on the dashboard's due-soon highlight.
+
+\clearpage
+\section*{Appendix: Visual Diagrams}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth]{../../midterm/diagrams/lifeadmin_usecase.png}
+    \caption{LifeAdmin use-case diagram}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth]{../../midterm/diagrams/lifeadmin_flowchart.png}
+    \caption{LifeAdmin application flowchart}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=\textwidth]{../../midterm/diagrams/lifeadmin_classdiagram.png}
+    \caption{LifeAdmin class diagram}
+\end{figure}
 
 \end{document}

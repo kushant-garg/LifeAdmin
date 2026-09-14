@@ -211,12 +211,13 @@ public class ChoreApp extends Application {
 
             Label title = new Label(c.getTitle());
             title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+            title.setTextFill(Color.web("#0f766e"));
 
             String recurrenceTag = c.getRecurrence() != null && !c.getRecurrence().equals("none")
                     ? "  •  repeats " + c.getRecurrence() : "";
             Label details = new Label("Due " + c.getDueDate() + "  •  " + c.getCategory()
                     + recurrenceTag + (isDueSoon ? "  •  Due soon" : ""));
-            details.setStyle(isDueSoon ? "-fx-text-fill: #f59e0b; -fx-font-weight: bold;" : "-fx-text-fill: #6b7280;");
+            details.setStyle(isDueSoon ? "-fx-text-fill: #f59e0b; -fx-font-weight: bold;" : "-fx-text-fill: #374151;");
 
             VBox textBox = new VBox(2, title, details);
             HBox.setHgrow(textBox, Priority.ALWAYS);
@@ -260,6 +261,10 @@ public class ChoreApp extends Application {
         chooseFileButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select a document to upload");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Documents", "*.pdf", "*.doc", "*.docx", "*.txt", "*.jpg", "*.jpeg", "*.png"),
+                    new FileChooser.ExtensionFilter("All Files", "*.*")
+            );
             File file = fileChooser.showOpenDialog(primaryStage);
             if (file != null) {
                 selected[0] = file;
@@ -317,9 +322,10 @@ public class ChoreApp extends Application {
         for (Document d : docs) {
             Label title = new Label(d.getTitle());
             title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+            title.setTextFill(Color.web("#0f766e"));
 
             Label details = new Label("Uploaded " + d.getUploadDate());
-            details.setStyle("-fx-text-fill: #6b7280;");
+            details.setStyle("-fx-text-fill: #374151;");
 
             VBox textBox = new VBox(2, title, details);
             HBox.setHgrow(textBox, Priority.ALWAYS);
@@ -327,9 +333,18 @@ public class ChoreApp extends Application {
             Button openButton = new Button("Open");
             openButton.setStyle(SECONDARY_BTN);
             openButton.setOnAction(e -> {
+                File file = new File(d.getFilePath());
+                if (!file.exists()) {
+                    title.setText(title.getText() + " (file missing)");
+                    return;
+                }
                 try {
-                    java.awt.Desktop.getDesktop().open(new File(d.getFilePath()));
-                } catch (IOException ex) {
+                    if (java.awt.Desktop.isDesktopSupported()) {
+                        java.awt.Desktop.getDesktop().open(file);
+                    } else {
+                        title.setText(title.getText() + " (opening not supported on this system)");
+                    }
+                } catch (IOException | IllegalArgumentException ex) {
                     title.setText(title.getText() + " (couldn't open file)");
                 }
             });
